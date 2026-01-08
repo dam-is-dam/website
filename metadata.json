@@ -1,0 +1,7 @@
+{
+  "name": "Art Archive - Professional Portfolio",
+  "description": "A sophisticated, responsive art portfolio archiving platform with AI-powered metadata enhancement.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
