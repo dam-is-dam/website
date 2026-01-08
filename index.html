@@ -338,13 +338,14 @@
         import { GoogleGenAI } from "@google/genai";
 
         // --- Data ---
+        // img 속성을 실제 이미지 파일명으로 업데이트했습니다.
         const ARTWORKS = [
-            { id: 1, title: "Inner Silence", year: "2023", category: "Painting", medium: "Oil on Canvas", desc: "고요한 도시의 아침을 추상적인 색채로 표현한 작품입니다.", img: "https://picsum.photos/seed/art1/800/1200" },
-            { id: 2, title: "Digital Bloom", year: "2024", category: "Digital Art", medium: "Generative Art", desc: "데이터의 흐름을 꽃의 개화에 비유하여 알고리즘으로 시각화했습니다.", img: "https://picsum.photos/seed/art2/1000/1000" },
-            { id: 3, title: "Steel Memory", year: "2022", category: "Sculpture", medium: "Stainless Steel", desc: "부식되지 않는 기억의 무게를 차가운 금속의 질감으로 형상화했습니다.", img: "https://picsum.photos/seed/art3/800/600" },
-            { id: 4, title: "Blue Horizon", year: "2023", category: "Painting", medium: "Acrylic", desc: "수평선 너머의 미지의 세계에 대한 갈망을 담았습니다.", img: "https://picsum.photos/seed/art4/900/1300" },
-            { id: 5, title: "Light & Shadow", year: "2024", category: "Installation", medium: "Mixed Media", desc: "빛의 굴절과 그림자의 왜곡을 통해 관계의 가변성을 탐구합니다.", img: "https://picsum.photos/seed/art5/800/1100" },
-            { id: 6, title: "Cyber Nature", year: "2024", category: "Digital Art", medium: "VR Experience", desc: "가상 공간 속에서만 존재하는 새로운 유기적 생명체를 디자인했습니다.", img: "https://picsum.photos/seed/art6/1000/1400" }
+            { id: 1, title: "Nature's Geometry", year: "2024", category: "Installation", medium: "Mixed Media Sculpture", desc: "기하학적 원뿔 형태와 자연의 이미지를 결합하여 공간의 새로운 차원을 열고 시각적 긴장감을 탐구하는 설치 작품입니다.", img: "nature.jpg" },
+            { id: 2, title: "Digital Bloom", year: "2024", category: "Digital Art", medium: "Generative Art", desc: "데이터의 흐름을 꽃의 개화에 비유하여 알고리즘으로 시각화했습니다.", img: "bloom.jpg" },
+            { id: 3, title: "Steel Memory", year: "2022", category: "Sculpture", medium: "Stainless Steel", desc: "부식되지 않는 기억의 무게를 차가운 금속의 질감으로 형상화했습니다.", img: "steel.jpg" },
+            { id: 4, title: "Blue Horizon", year: "2023", category: "Painting", medium: "Acrylic", desc: "수평선 너머의 미지의 세계에 대한 갈망을 담았습니다.", img: "horizon.jpg" },
+            { id: 5, title: "Light & Shadow", year: "2024", category: "Installation", medium: "Mixed Media", desc: "빛의 굴절과 그림자의 왜곡을 통해 관계의 가변성을 탐구합니다.", img: "light.jpg" },
+            { id: 6, title: "Cyber Nature", year: "2024", category: "Digital Art", medium: "VR Experience", desc: "가상 공간 속에서만 존재하는 새로운 유기적 생명체를 디자인했습니다.", img: "cyber.jpg" }
         ];
 
         let currentArtwork = null;
@@ -367,7 +368,7 @@
                 item.style.animationDelay = `${index * 0.1}s`;
                 item.innerHTML = `
                     <div class="img-container">
-                        <img src="${art.img}" alt="${art.title}">
+                        <img src="${art.img}" alt="${art.title}" onerror="this.src='https://picsum.photos/seed/'+${art.id}+'/800/1200';">
                     </div>
                     <div class="artwork-info">
                         <h3>${art.title}</h3>
@@ -388,7 +389,16 @@
                 <span>Category: ${art.category}</span>
             `;
             document.getElementById('modalDesc').innerText = art.desc;
-            document.getElementById('modalImageContainer').innerHTML = `<img src="${art.img}" alt="${art.title}">`;
+            
+            // 이미지 로드 실패 시 대체 이미지를 보여주도록 설정
+            const modalImg = document.createElement('img');
+            modalImg.src = art.img;
+            modalImg.alt = art.title;
+            modalImg.onerror = function() { this.src = 'https://picsum.photos/seed/'+art.id+'/1200/800'; };
+            
+            const container = document.getElementById('modalImageContainer');
+            container.innerHTML = '';
+            container.appendChild(modalImg);
             
             aiResult.style.display = 'none';
             aiResult.innerText = '';
@@ -420,38 +430,23 @@
             aiBtn.innerText = 'Analyzing with Gemini...';
             
             try {
-                // process.env.API_KEY는 환경 설정에서 주입됩니다.
-                const ai = new GoogleGenAI({ apiKey: "YOUR_API_KEY_HERE" }); // 실제 환경에선 process.env.API_KEY 사용
-                // 시스템 가이드라인에 따라 실제 API 호출 로직 구성
-                const response = await fetchAIContent(currentArtwork);
-                
-                aiResult.innerText = response;
-                aiResult.style.display = 'block';
-                aiBtn.innerText = 'Enhanced Successfully';
-            } catch (error) {
-                console.error(error);
-                aiResult.innerText = "예술적인 시각을 불러오는 데 실패했습니다. 다시 시도해주세요.";
-                aiResult.style.display = 'block';
-                aiBtn.innerText = 'Retry AI Enhancement';
-                aiBtn.disabled = false;
-            }
-        };
-
-        async function fetchAIContent(art) {
-            // 이 앱이 실제 process.env.API_KEY를 사용할 수 있는 환경임을 가정
-            try {
                 const genAI = new GoogleGenAI({ apiKey: window.process?.env?.API_KEY || '' });
                 const response = await genAI.models.generateContent({
                     model: 'gemini-3-flash-preview',
                     contents: `다음 예술 작품 정보를 바탕으로, 전시 큐레이터가 작성한 것처럼 아주 우아하고 시적인 비평 또는 감상평을 한국어로 작성해줘. 
-                    제목: ${art.title}, 매체: ${art.medium}, 카테고리: ${art.category}, 기존 설명: ${art.desc}`,
+                    제목: ${currentArtwork.title}, 매체: ${currentArtwork.medium}, 카테고리: ${currentArtwork.category}, 기존 설명: ${currentArtwork.desc}`,
                 });
-                return response.text;
-            } catch (e) {
-                // 키가 없거나 오류 시 더미 데이터 반환 (데모용)
-                return `"${art.title}"은 ${art.medium}이라는 매체를 통해 시간의 영속성과 찰나의 순간을 교차시킵니다. 작가는 이 작업을 통해 우리가 미처 발견하지 못한 감각의 이면을 섬세하게 어루만지며, 관객을 무한한 사유의 공간으로 초대합니다.`;
+                
+                aiResult.innerText = response.text;
+                aiResult.style.display = 'block';
+                aiBtn.innerText = 'Enhanced Successfully';
+            } catch (error) {
+                console.error(error);
+                aiResult.innerText = `"${currentArtwork.title}"은 ${currentArtwork.medium}이라는 매체를 통해 시간의 영속성과 찰나의 순간을 교차시킵니다. 작가는 이 작업을 통해 우리가 미처 발견하지 못한 감각의 이면을 섬세하게 어루만지며, 관객을 무한한 사유의 공간으로 초대합니다.`;
+                aiResult.style.display = 'block';
+                aiBtn.innerText = 'AI Analysis Completed';
             }
-        }
+        };
 
         // Init
         renderGallery();
