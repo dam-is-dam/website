@@ -1,19 +1,12 @@
 
-export enum Category {
-  PAINTING = 'Painting',
-  SCULPTURE = 'Sculpture',
-  DIGITAL = 'Digital Art',
-  PHOTOGRAPHY = 'Photography',
-  INSTALLATION = 'Installation'
-}
-
+// types.ts - Core data structures for the Art Archive application
 export interface Artwork {
   id: string;
   title: string;
   year: string;
-  category: Category;
   medium: string;
   dimensions: string;
+  category: string;
   description: string;
   imageUrl: string;
   tags: string[];
@@ -21,6 +14,6 @@ export interface Artwork {
 
 export interface AIAnalysisResult {
   summary: string;
+  suggestedPoetry: string;
   suggestedTags: string[];
-  suggestedPoetry?: string;
 }
